@@ -26,7 +26,7 @@ if (isset($_POST['upload'])) {
     $ext  = strtolower(pathinfo($foto, PATHINFO_EXTENSION));
     
     $nama_foto_baru = time() . '_' . rand(100,999) . '.' . $ext;
-    $path = "assets/img/katalog/" . $nama_foto_baru;
+    $path = "assets/uploads/foto/" . $nama_foto_baru;
 
     if (move_uploaded_file($tmp, $path)) {
         $query = "INSERT INTO tb_katalog (id_umkm, nama_produk, deskripsi, harga, foto, status) 
@@ -174,7 +174,7 @@ $result_produk = mysqli_query($koneksi, $query_produk);
                     <?php while($row = mysqli_fetch_assoc($result_produk)): ?>
                     <tr>
                         <td>
-                            <img src="assets/img/katalog/<?= $row['foto']; ?>" width="60" style="border-radius: 4px; object-fit: cover; aspect-ratio: 1/1;">
+                            <<img src="assets/uploads/foto/<?= $row['foto']; ?>" width="60" style="border-radius: 4px; object-fit: cover; aspect-ratio: 1/1;">
                         </td>
                         <td>
                             <strong><?= htmlspecialchars($row['nama_produk']); ?></strong><br>

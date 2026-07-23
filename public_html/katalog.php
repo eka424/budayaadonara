@@ -127,7 +127,7 @@ $result = mysqli_query($koneksi, $query);
                     $link_wa  = "https://wa.me/" . preg_replace('/[^0-9]/', '', $row['no_wa']) . "?text=" . $pesan_wa;
                 ?>
                 <div class="card">
-                    <img src="assets/img/katalog/<?= $row['foto']; ?>" alt="<?= htmlspecialchars($row['nama_produk']); ?>">
+                    <img src="assets/uploads/foto/<?= $row['foto']; ?>" alt="<?= htmlspecialchars($row['nama_produk']); ?>">
                     <div class="card-body">
                         <h3><?= htmlspecialchars($row['nama_produk']); ?></h3>
                         <div class="seller-info">Oleh: <?= htmlspecialchars($row['nama_usaha']); ?></div>
