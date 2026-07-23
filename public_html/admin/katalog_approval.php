@@ -98,7 +98,18 @@ $result = mysqli_query($koneksi, $query);
         .umkm-name { font-weight: 600; color: var(--text-main); }
         .umkm-wa { font-size: 12px; color: var(--text-muted); }
 
-        .product-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; }
+        .product-thumb { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            border: 1px solid #eee; 
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .product-thumb:hover {
+            transform: scale(1.05);
+        }
         
         .product-detail { display: flex; flex-direction: column; gap: 4px; }
         .product-name { font-weight: 600; }
@@ -115,6 +126,39 @@ $result = mysqli_query($koneksi, $query);
         .btn-approve:hover { background: #137333; color: #fff; }
         .btn-reject { background: #ffeaea; color: #d93025; border: 1px solid #f5c6c6; }
         .btn-reject:hover { background: #d93025; color: #fff; }
+
+        /* --- MODAL IMAGE --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1001; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.85); 
+            align-items: center; 
+            justify-content: center;
+        }
+        .modal-content {
+            max-width: 90%; 
+            max-height: 90%; 
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .close-modal {
+            position: absolute; 
+            top: 20px; 
+            right: 35px; 
+            color: #f1f1f1; 
+            font-size: 40px; 
+            font-weight: bold; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close-modal:hover {
+            color: var(--gold);
+        }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -169,7 +213,10 @@ $result = mysqli_query($koneksi, $query);
                                     <span class="umkm-wa">WA: <?= htmlspecialchars($row['no_wa']); ?></span>
                                 </div>
                             </td>
-                            <td><img src="../assets/uploads/foto/<?= htmlspecialchars($row['foto']); ?>" class="product-thumb" alt="Foto Produk"></td>
+                            <td>
+                                <!-- Tambahkan event onclick pada foto -->
+                                <img src="../assets/uploads/foto/<?= htmlspecialchars($row['foto']); ?>" class="product-thumb" alt="Foto Produk" onclick="openModal(this.src)" title="Klik untuk memperbesar">
+                            </td>
                             <td>
                                 <div class="product-detail">
                                     <span class="product-name"><?= htmlspecialchars($row['nama_produk']); ?></span>
@@ -205,10 +252,35 @@ $result = mysqli_query($koneksi, $query);
     </div>
 </div>
 
+<!-- Modal Container untuk Gambar -->
+<div id="imageModal" class="modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
 <script>
+    // Script Sidebar
     document.getElementById('menu-toggle').addEventListener('click', function() {
         document.getElementById('sidebar').classList.toggle('active');
     });
+
+    // Script Modal Lightbox
+    function openModal(imageSrc) {
+        document.getElementById('imageModal').style.display = 'flex';
+        document.getElementById('modalImage').src = imageSrc;
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+
+    // Menutup modal jika area luar gambar diklik
+    window.onclick = function(event) {
+        var modal = document.getElementById('imageModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
 </script>
 
 </body>

@@ -66,19 +66,7 @@ $d_galeri = mysqli_fetch_assoc($q_galeri);
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header"><h3>ADONARA</h3><p>Admin Panel</p></div>
-    <div class="sidebar-menu">
-        <a href="dashboard.php" class="active">❖ Dashboard</a>
-        <a href="sejarah_kelola.php">📄 Sejarah</a>
-        <a href="tradisi_kelola.php">🌿 Tradisi</a>
-        <a href="seni_kelola.php">🎭 Seni & Budaya</a>
-        <a href="galeri_kelola.php">🖼️ Galeri</a>
-        <a href="kontak_kelola.php">📍 Kontak</a>
-        <a href="katalog_approval.php">Approval Produk</a>
-        <a href="logout.php" class="btn-logout">⎋ Logout</a>
-    </div>
-</div>
+<?php include 'sidebar.php'; ?>
 
 <div class="main-content">
     <div class="menu-toggle" id="menu-toggle">☰ Menu</div>
