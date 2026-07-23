@@ -1,11 +1,9 @@
 <?php
-<?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Sesuaikan path koneksi dengan struktur folder admin kamu
-require_once '../config/koneksi.php';
+require_once '../config/koneksi.php'; 
 
 // Logika Approve / Reject
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
@@ -13,9 +11,9 @@ if (isset($_GET['aksi']) && isset($_GET['id'])) {
     $aksi = $_GET['aksi'];
     
     if ($aksi == 'approve') {
-        mysqli_query($koneksi1, "UPDATE tb_katalog SET status='approved' WHERE id='$id'");
+        mysqli_query($koneksi, "UPDATE tb_katalog SET status='approved' WHERE id='$id'");
     } elseif ($aksi == 'reject') {
-        mysqli_query($koneksi1, "UPDATE tb_katalog SET status='rejected' WHERE id='$id'");
+        mysqli_query($koneksi, "UPDATE tb_katalog SET status='rejected' WHERE id='$id'");
     }
     
     header("Location: katalog_approval.php");
@@ -27,7 +25,7 @@ $query = "SELECT k.*, u.nama_usaha, u.no_wa
           FROM tb_katalog k 
           JOIN tb_umkm u ON k.id_umkm = u.id 
           ORDER BY k.id DESC";
-$result = mysqli_query($koneksi1, $query);
+$result = mysqli_query($koneksi, $query);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -56,29 +54,33 @@ $result = mysqli_query($koneksi1, $query);
             <th>Status Saat Ini</th>
             <th>Aksi</th>
         </tr>
-        <?php $no=1; while($row = mysqli_fetch_assoc($result)): ?>
-        <tr>
-            <td><?= $no++; ?></td>
-            <td><?= htmlspecialchars($row['nama_usaha']); ?><br><small><?= htmlspecialchars($row['no_wa']); ?></small></td>
-            <td><img src="../assets/img/katalog/<?= $row['foto']; ?>" width="100"></td>
-            <td>
-                <strong><?= htmlspecialchars($row['nama_produk']); ?></strong><br>
-                Rp <?= number_format($row['harga'], 0, ',', '.'); ?>
-            </td>
-            <td>
-                <b><?= strtoupper($row['status']); ?></b>
-            </td>
-            <td>
-                <?php if($row['status'] == 'pending' || $row['status'] == 'rejected'): ?>
-                    <a href="?aksi=approve&id=<?= $row['id']; ?>" class="btn-approve">Approve</a>
-                <?php endif; ?>
-                
-                <?php if($row['status'] == 'pending' || $row['status'] == 'approved'): ?>
-                    <a href="?aksi=reject&id=<?= $row['id']; ?>" class="btn-reject" onclick="return confirm('Tolak produk ini?');">Reject</a>
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endwhile; ?>
+        <?php if($result && mysqli_num_rows($result) > 0): ?>
+            <?php $no=1; while($row = mysqli_fetch_assoc($result)): ?>
+            <tr>
+                <td><?= $no++; ?></td>
+                <td><?= htmlspecialchars($row['nama_usaha']); ?><br><small><?= htmlspecialchars($row['no_wa']); ?></small></td>
+                <td><img src="../assets/img/katalog/<?= $row['foto']; ?>" width="100"></td>
+                <td>
+                    <strong><?= htmlspecialchars($row['nama_produk']); ?></strong><br>
+                    Rp <?= number_format($row['harga'], 0, ',', '.'); ?>
+                </td>
+                <td>
+                    <b><?= strtoupper($row['status']); ?></b>
+                </td>
+                <td>
+                    <?php if($row['status'] == 'pending' || $row['status'] == 'rejected'): ?>
+                        <a href="?aksi=approve&id=<?= $row['id']; ?>" class="btn-approve">Approve</a>
+                    <?php endif; ?>
+                    
+                    <?php if($row['status'] == 'pending' || $row['status'] == 'approved'): ?>
+                        <a href="?aksi=reject&id=<?= $row['id']; ?>" class="btn-reject" onclick="return confirm('Tolak produk ini?');">Reject</a>
+                    <?php endif; ?>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr><td colspan="6" style="text-align: center;">Belum ada data produk.</td></tr>
+        <?php endif; ?>
     </table>
 </body>
 </html>
