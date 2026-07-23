@@ -14,6 +14,28 @@ if (!isset($_SESSION['umkm_id'])) {
 
 $id_umkm = $_SESSION['umkm_id'];
 $pesan = '';
+$pesan_profil = '';
+
+// ==========================================
+// LOGIKA UPDATE PROFIL UMKM
+// ==========================================
+if (isset($_POST['update_profil'])) {
+    $nama_usaha_baru = mysqli_real_escape_string($koneksi, trim($_POST['nama_usaha']));
+    $no_wa_baru = mysqli_real_escape_string($koneksi, trim($_POST['no_wa']));
+
+    $q_update_profil = "UPDATE tb_umkm SET nama_usaha='$nama_usaha_baru', no_wa='$no_wa_baru' WHERE id='$id_umkm'";
+    
+    if (mysqli_query($koneksi, $q_update_profil)) {
+        $_SESSION['umkm_nama'] = $nama_usaha_baru; // Update session
+        $pesan_profil = "<div class='alert success'>Profil berhasil diperbarui.</div>";
+    } else {
+        $pesan_profil = "<div class='alert error'>Gagal memperbarui profil: " . mysqli_error($koneksi) . "</div>";
+    }
+}
+
+// Ambil data profil terbaru untuk ditampilkan
+$q_profil = mysqli_query($koneksi, "SELECT * FROM tb_umkm WHERE id='$id_umkm'");
+$d_profil = mysqli_fetch_assoc($q_profil);
 
 // ==========================================
 // LOGIKA HAPUS PRODUK
@@ -112,7 +134,7 @@ if (isset($_POST['update'])) {
 }
 
 // ==========================================
-// PERSIAPAN DATA UNTUK FORM EDIT
+// PERSIAPAN DATA UNTUK FORM EDIT PRODUK
 // ==========================================
 $is_edit = false;
 $e_id = ''; $e_nama = ''; $e_harga = ''; $e_desk = ''; $e_foto = '';
@@ -164,7 +186,11 @@ $result_produk = mysqli_query($koneksi, $query_produk);
         .profile-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 15px; background-color: #eee; }
         .profile-name { font-size: 20px; font-weight: 600; margin-bottom: 5px; color: var(--text-main); }
         .profile-role { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        .profile-wa { font-size: 14px; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 20px; color: var(--text-main); }
         
+        .btn-edit-profil { display: block; width: 100%; padding: 10px; background: #fff; color: var(--primary); border: 1px solid var(--primary); text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px; transition: all 0.3s ease; margin-bottom: 10px; cursor: pointer; }
+        .btn-edit-profil:hover { background: var(--primary); color: #fff; }
+
         .btn-logout { display: block; width: 100%; padding: 12px; background: #fff; color: #dc3545; border: 1px solid #dc3545; text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; }
         .btn-logout:hover { background: #dc3545; color: #fff; }
 
@@ -204,12 +230,18 @@ $result_produk = mysqli_query($koneksi, $query_produk);
         .alert.error { background-color: #ffeaea; color: #d93025; border: 1px solid #f5c6c6; }
         .alert.success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
 
-        /* Action Buttons di Table */
         .btn-sm { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none; transition: 0.3s; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
         .btn-edit { background-color: #e8f0fe; color: #1a73e8; border: 1px solid #d2e3fc; }
         .btn-edit:hover { background-color: #1a73e8; color: #fff; }
         .btn-delete { background-color: #ffeaea; color: #d93025; border: 1px solid #f5c6c6; }
         .btn-delete:hover { background-color: #d93025; color: #fff; }
+
+        /* Modal Styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--bg-card); width: 100%; max-width: 450px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close-modal { float: right; font-size: 24px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+        .close-modal:hover { color: var(--text-main); }
 
         @media (max-width: 992px) {
             .dashboard-wrapper { grid-template-columns: 1fr; }
@@ -222,15 +254,23 @@ $result_produk = mysqli_query($koneksi, $query_produk);
         
         <!-- Sidebar Profile -->
         <aside class="profile-sidebar card">
-            <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['umkm_nama']); ?>&background=d4af37&color=000" alt="Profile" class="profile-avatar">
-            <h2 class="profile-name"><?= htmlspecialchars($_SESSION['umkm_nama']); ?></h2>
+            <img src="https://ui-avatars.com/api/?name=<?= urlencode($d_profil['nama_usaha']); ?>&background=d4af37&color=000" alt="Profile" class="profile-avatar">
+            <h2 class="profile-name"><?= htmlspecialchars($d_profil['nama_usaha']); ?></h2>
             <div class="profile-role">Mitra UMKM Adonara</div>
+            
+            <div class="profile-wa">
+                <small style="color: var(--text-muted); display: block;">No. WhatsApp</small>
+                <strong><?= htmlspecialchars($d_profil['no_wa']); ?></strong>
+            </div>
+
+            <button onclick="document.getElementById('modal-profil').style.display='flex'" class="btn-edit-profil">Edit Profil</button>
             <a href="logout_umkm.php" class="btn-logout">Logout</a>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             
+            <?= $pesan_profil; ?>
             <?= $pesan; ?>
 
             <!-- Form Card (Dinasti Upload / Edit) -->
@@ -241,7 +281,6 @@ $result_produk = mysqli_query($koneksi, $query_produk);
                 
                 <form action="dashboard_umkm.php" method="POST" enctype="multipart/form-data">
                     <?php if($is_edit): ?>
-                        <!-- Input hidden untuk identitas data yang diedit -->
                         <input type="hidden" name="id_produk" value="<?= $e_id ?>">
                         <input type="hidden" name="foto_lama" value="<?= $e_foto ?>">
                     <?php endif; ?>
@@ -269,7 +308,6 @@ $result_produk = mysqli_query($koneksi, $query_produk);
                                 <img src="assets/uploads/foto/<?= $e_foto ?>" width="80" style="border-radius: 6px; border: 1px solid #ddd;">
                             </div>
                         <?php endif; ?>
-                        <!-- Require file hanya jika sedang upload baru, jika edit sifatnya opsional -->
                         <input type="file" name="foto" class="form-control" accept="image/*" <?= $is_edit ? '' : 'required' ?> style="padding: 9px 15px;">
                     </div>
                     
@@ -334,5 +372,34 @@ $result_produk = mysqli_query($koneksi, $query_produk);
 
         </main>
     </div>
+
+    <!-- Modal Edit Profil -->
+    <div id="modal-profil" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('modal-profil').style.display='none'">&times;</span>
+            <h3 style="margin-bottom: 20px; font-weight: 600;">Edit Profil</h3>
+            <form action="dashboard_umkm.php" method="POST">
+                <div class="form-group">
+                    <label>Nama Usaha / Profil</label>
+                    <input type="text" name="nama_usaha" class="form-control" value="<?= htmlspecialchars($d_profil['nama_usaha']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Nomor WhatsApp</label>
+                    <input type="text" name="no_wa" class="form-control" value="<?= htmlspecialchars($d_profil['no_wa']); ?>" required>
+                </div>
+                <button type="submit" name="update_profil" class="btn-submit" style="width: 100%; margin-top: 10px;">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tutup modal bila klik di luar modal-content
+        window.onclick = function(event) {
+            var modal = document.getElementById('modal-profil');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
