@@ -80,18 +80,7 @@ $result = mysqli_query($koneksi, $query);
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header"><h3>ADONARA</h3><p>Admin Panel</p></div>
-    <div class="sidebar-menu">
-        <a href="dashboard.php">❖ Dashboard</a>
-        <a href="sejarah_kelola.php">📄 Kelola Sejarah</a>
-        <a href="tradisi_kelola.php" class="active">🌿 Kelola Tradisi</a>
-        <a href="seni_kelola.php">🎭 Kelola Seni & Budaya</a>
-        <a href="galeri_kelola.php">🖼️ Kelola Galeri</a>
-        <a href="kontak_kelola.php">📍 Kontak & Lokasi</a>
-        <a href="logout.php" class="btn-logout">⎋ Logout</a>
-    </div>
-</div>
+<?php include 'sidebar.php'; ?>
 
 <div class="main-content">
     <div class="menu-toggle" id="menu-toggle">☰ Menu</div>
