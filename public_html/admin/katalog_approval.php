@@ -1,6 +1,11 @@
 <?php
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Sesuaikan path koneksi dengan struktur folder admin kamu
-require_once '../config/koneksi.php'; 
+require_once '../config/koneksi.php';
 
 // Logika Approve / Reject
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
