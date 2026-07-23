@@ -248,6 +248,26 @@ $data_kontak = mysqli_fetch_assoc($result_kontak);
                 padding: 10px 15px;
                 font-size: 13px;
             }
+
+            /* Sembunyikan tombol X (close menu) di tampilan desktop */
+.close-menu {
+    display: none;
+}
+
+/* Tampilkan tombol X hanya di tampilan mobile (HP) */
+@media (max-width: 768px) {
+    .close-menu {
+        display: block;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: transparent;
+        color: var(--gold, #d4af37);
+        border: none;
+        font-size: 30px;
+        cursor: pointer;
+    }
+}
         }
     </style>
 </head>
