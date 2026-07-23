@@ -1,7 +1,14 @@
 <?php
+session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Pastikan admin sudah login
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit;
+}
 
 require_once '../config/koneksi.php'; 
 
@@ -31,56 +38,178 @@ $result = mysqli_query($koneksi, $query);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Approval Katalog UMKM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Katalog UMKM - Admin Budaya Adonara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid #333; }
-        th, td { padding: 10px; text-align: left; }
-        .btn-approve { background: green; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
-        .btn-reject { background: red; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        :root {
+            --primary-dark: #1A362D;
+            --gold: #D4AF37;
+            --bg-color: #F4F7F6;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-muted: #777777;
+            --border-color: #eaeaea;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); display: flex; color: var(--text-main); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--primary-dark); color: #fff;
+            position: fixed; height: 100vh; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-menu a { display: block; color: rgba(255,255,255,0.7); padding: 15px 20px; text-decoration: none; transition: 0.3s; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(212, 175, 55, 0.2); color: var(--gold); }
+        .btn-logout { color: #ff6b6b !important; margin-top: 20px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        
+        /* Hamburger Mobile */
+        .menu-toggle { display: none; font-size: 24px; cursor: pointer; margin-bottom: 20px; }
+
+        .page-title {
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        /* --- TABLE STYLES --- */
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .table-responsive { overflow-x: auto; padding: 20px;}
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background-color: #f9f9f9; color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        tr:hover td { background-color: #fcfcfc; }
+
+        /* --- ELEMENTS --- */
+        .umkm-info { display: flex; flex-direction: column; gap: 4px; }
+        .umkm-name { font-weight: 600; color: var(--text-main); }
+        .umkm-wa { font-size: 12px; color: var(--text-muted); }
+
+        .product-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #eee; }
+        
+        .product-detail { display: flex; flex-direction: column; gap: 4px; }
+        .product-name { font-weight: 600; }
+        .product-price { color: var(--gold); font-weight: 500; }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-approved { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none; transition: 0.3s; text-align: center; }
+        .btn-approve { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+        .btn-approve:hover { background: #137333; color: #fff; }
+        .btn-reject { background: #ffeaea; color: #d93025; border: 1px solid #f5c6c6; }
+        .btn-reject:hover { background: #d93025; color: #fff; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 20px; }
+            .menu-toggle { display: block; }
+        }
     </style>
 </head>
 <body>
-    <h2>Approval Produk Tenun Ikat UMKM</h2>
-    <a href="index.php" style="margin-bottom: 20px; display: inline-block;">&larr; Kembali ke Dashboard Admin</a>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h3>ADONARA</h3><p>Admin Panel</p></div>
+    <div class="sidebar-menu">
+        <a href="dashboard.php">❖ Dashboard</a>
+        <a href="sejarah_kelola.php">📄 Sejarah</a>
+        <a href="tradisi_kelola.php">🌿 Tradisi</a>
+        <a href="seni_kelola.php">🎭 Seni & Budaya</a>
+        <a href="galeri_kelola.php">🖼️ Galeri</a>
+        <a href="kontak_kelola.php">📍 Kontak</a>
+        <a href="katalog_approval.php" class="active">🛒 Approval Produk</a>
+        <a href="logout.php" class="btn-logout">⎋ Logout</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="menu-toggle" id="menu-toggle">☰ Menu</div>
     
-    <table>
-        <tr>
-            <th>No</th>
-            <th>Nama Usaha</th>
-            <th>Foto</th>
-            <th>Nama Produk & Harga</th>
-            <th>Status Saat Ini</th>
-            <th>Aksi</th>
-        </tr>
-        <?php if($result && mysqli_num_rows($result) > 0): ?>
-            <?php $no=1; while($row = mysqli_fetch_assoc($result)): ?>
-            <tr>
-                <td><?= $no++; ?></td>
-                <td><?= htmlspecialchars($row['nama_usaha']); ?><br><small><?= htmlspecialchars($row['no_wa']); ?></small></td>
-                <td><img src="../assets/img/katalog/<?= $row['foto']; ?>" width="100"></td>
-                <td>
-                    <strong><?= htmlspecialchars($row['nama_produk']); ?></strong><br>
-                    Rp <?= number_format($row['harga'], 0, ',', '.'); ?>
-                </td>
-                <td>
-                    <b><?= strtoupper($row['status']); ?></b>
-                </td>
-                <td>
-                    <?php if($row['status'] == 'pending' || $row['status'] == 'rejected'): ?>
-                        <a href="?aksi=approve&id=<?= $row['id']; ?>" class="btn-approve">Approve</a>
+    <h2 class="page-title">Approval Katalog UMKM</h2>
+    
+    <div class="table-card">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Data Mitra UMKM</th>
+                        <th>Foto</th>
+                        <th>Produk & Harga</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if($result && mysqli_num_rows($result) > 0): ?>
+                        <?php $no=1; while($row = mysqli_fetch_assoc($result)): ?>
+                        <tr>
+                            <td><?= $no++; ?></td>
+                            <td>
+                                <div class="umkm-info">
+                                    <span class="umkm-name"><?= htmlspecialchars($row['nama_usaha']); ?></span>
+                                    <span class="umkm-wa">WA: <?= htmlspecialchars($row['no_wa']); ?></span>
+                                </div>
+                            </td>
+                            <td><img src="../assets/uploads/foto/<?= htmlspecialchars($row['foto']); ?>" class="product-thumb" alt="Foto Produk"></td>
+                            <td>
+                                <div class="product-detail">
+                                    <span class="product-name"><?= htmlspecialchars($row['nama_produk']); ?></span>
+                                    <span class="product-price">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></span>
+                                </div>
+                            </td>
+                            <td>
+                                <?php 
+                                    if($row['status'] == 'pending') echo "<span class='status-badge status-pending'>Pending Review</span>";
+                                    elseif($row['status'] == 'approved') echo "<span class='status-badge status-approved'>Approved</span>";
+                                    else echo "<span class='status-badge status-rejected'>Rejected</span>";
+                                ?>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <?php if($row['status'] == 'pending' || $row['status'] == 'rejected'): ?>
+                                        <a href="?aksi=approve&id=<?= $row['id']; ?>" class="btn-action btn-approve" onclick="return confirm('Setujui produk ini tayang ke katalog publik?');">Approve</a>
+                                    <?php endif; ?>
+                                    
+                                    <?php if($row['status'] == 'pending' || $row['status'] == 'approved'): ?>
+                                        <a href="?aksi=reject&id=<?= $row['id']; ?>" class="btn-action btn-reject" onclick="return confirm('Tolak produk ini?');">Reject</a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr><td colspan="6" style="text-align: center; padding: 40px; color: #777;">Belum ada pengajuan produk dari UMKM.</td></tr>
                     <?php endif; ?>
-                    
-                    <?php if($row['status'] == 'pending' || $row['status'] == 'approved'): ?>
-                        <a href="?aksi=reject&id=<?= $row['id']; ?>" class="btn-reject" onclick="return confirm('Tolak produk ini?');">Reject</a>
-                    <?php endif; ?>
-                </td>
-            </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr><td colspan="6" style="text-align: center;">Belum ada data produk.</td></tr>
-        <?php endif; ?>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('active');
+    });
+</script>
+
 </body>
 </html>
