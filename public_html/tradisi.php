@@ -245,52 +245,10 @@ $result_tradisi = mysqli_query($koneksi, $query_tradisi);
         <div class="vertical-text">Cultural Experience</div>
     </aside>
 
+    <!-- Konten Utama Kanan -->
     <main class="main-content">
-        <nav class="top-nav">
-            <div class="hamburger-menu" id="hamburger-menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <div class="nav-links" id="nav-links">
-                <button class="close-menu" id="close-menu">&times;</button>
-                <a href="index.php">Beranda</a>
-                
-                <div class="dropdown">
-                    <a href="sejarah.php">Sejarah ▾</a>
-                    <div class="dropdown-content">
-                        <a href="sejarah.php#sejarah-adonara">Sejarah Adonara</a>
-                        <a href="sejarah.php#sejarah-perang-hongi-1904">Perang Hongi</a>
-                    </div>
-                </div>
-
-                <div class="dropdown">
-                    <a href="tradisi.php" class="active">Tradisi ▾</a>
-                    <div class="dropdown-content">
-                        <!-- LINK MENU TRADISI: Default target ke talin (sesuaikan dengan nama judul di database jika beda) -->
-                        <a href="tradisi.php#talin">Tradisi Talin</a>
-                    </div>
-                </div>
-
-                <div class="dropdown">
-                    <a href="seni_budaya.php">Seni & Budaya ▾</a>
-                    <div class="dropdown-content">
-                        <a href="seni_budaya.php#tari-hedung">Tari Hedung</a>
-                        <a href="seni_budaya.php#tenun-ikat">Tenun Ikat</a>
-                    </div>
-                </div>
-
-                <div class="dropdown">
-                    <a href="galeri.php">Galeri ▾</a>
-                    <div class="dropdown-content">
-                        <a href="galeri.php#foto">Galeri Foto</a>
-                        <a href="galeri.php#video">Galeri Video</a>
-                    </div>
-                </div>
-            </div>
-            <a href="kontak.php" class="btn-contact">Kontak</a>
-        </nav>
+        
+        <?php include 'navbar.php'; ?>
 
         <section class="about-section animate-on-scroll" style="border-top: none; padding-top: 60px; padding-bottom: 20px;">
             <div class="about-header">
